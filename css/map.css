@@ -1,0 +1,32 @@
+.map-surface {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(180, 196, 188, 0.55), rgba(208, 218, 212, 0.3)),
+    repeating-linear-gradient(
+      45deg,
+      rgba(100, 112, 106, 0.06) 0,
+      rgba(100, 112, 106, 0.06) 8px,
+      rgba(100, 112, 106, 0.01) 8px,
+      rgba(100, 112, 106, 0.01) 18px
+    );
+}
+
+.map-placeholder {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.map-placeholder h2 {
+  margin: 0 0 8px;
+}
+
+.map-placeholder p {
+  margin: 0;
+  color: var(--bg-muted);
+}

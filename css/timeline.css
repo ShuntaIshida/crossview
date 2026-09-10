@@ -1,0 +1,27 @@
+.timeline-shell {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid var(--line);
+  padding: 10px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeline-header .time-text {
+  color: var(--bg-muted);
+  font-size: 0.9rem;
+}
+
+.timeline-track {
+  width: 100%;
+}

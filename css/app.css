@@ -1,0 +1,55 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap");
+
+:root {
+  --bg-main: #f0f2ef;
+  --bg-panel: #ffffff;
+  --bg-panel-soft: #e7ece8;
+  --bg-ink: #1f2723;
+  --bg-muted: #64706a;
+  --accent: #0d9488;
+  --accent-strong: #0f766e;
+  --warn: #b45309;
+  --danger: #b91c1c;
+  --line: #c4cec8;
+  --shadow: 0 12px 24px rgba(20, 24, 22, 0.12);
+  --radius-m: 12px;
+  --radius-s: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: "Space Grotesk", "Noto Sans JP", sans-serif;
+  background: radial-gradient(circle at 20% 10%, #fbfcfb, #eef2ef 65%, #e2e9e4);
+  color: var(--bg-ink);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.hidden {
+  display: none !important;
+}

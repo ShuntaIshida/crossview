@@ -1,0 +1,156 @@
+.screen {
+  min-height: 100vh;
+}
+
+.start-screen {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+.start-card {
+  width: min(640px, 100%);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+.start-title {
+  margin: 0 0 8px;
+  font-size: 2rem;
+}
+
+.start-subtitle {
+  margin: 0 0 22px;
+  color: var(--bg-muted);
+}
+
+.start-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.primary-btn {
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 16px;
+}
+
+.primary-btn:hover {
+  background: var(--accent-strong);
+  transform: translateY(-1px);
+}
+
+.ghost-btn {
+  background: #fff;
+  border-color: var(--line);
+  padding: 10px 16px;
+}
+
+.ghost-btn:hover {
+  border-color: var(--accent-strong);
+}
+
+.project-form {
+  display: grid;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.form-row {
+  display: grid;
+  gap: 6px;
+}
+
+.form-row label {
+  font-weight: 500;
+}
+
+.form-row input,
+.form-row select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: 9px 10px;
+  background: #fff;
+}
+
+.main-shell {
+  min-height: 100vh;
+  position: relative;
+}
+
+.workspace {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.top-center-controls {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 10px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+}
+
+.mode-switch {
+  display: inline-flex;
+  background: var(--bg-panel-soft);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.mode-btn {
+  border: 0;
+  background: transparent;
+  color: var(--bg-muted);
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.mode-btn.active {
+  background: #fff;
+  color: var(--bg-ink);
+  border: 1px solid var(--line);
+}
+
+.mode-caption {
+  font-size: 0.78rem;
+  color: var(--bg-muted);
+}
+
+.toolbar-right {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+}
+
+.small-btn {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 900px) {
+  .top-center-controls {
+    top: 10px;
+    width: calc(100% - 24px);
+  }
+}
