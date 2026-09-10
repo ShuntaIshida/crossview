@@ -1,4 +1,4 @@
-import { createAnalysisSession, createProgressState } from "../domain/models.js";
+import { createAnalysisSession, createPhase3AProbeState, createProgressState } from "../domain/models.js";
 
 const listeners = new Set();
 
@@ -10,11 +10,8 @@ export const state = {
   analysisModalVisible: false,
   analysisSession: createAnalysisSession(),
   progress: createProgressState(""),
-  demoRoutes: [
-    { id: "route-01", name: "Route-01", color: "#0d9488", visible: true },
-    { id: "route-02", name: "Route-02", color: "#ea580c", visible: true },
-    { id: "route-03", name: "Route-03", color: "#2563eb", visible: true }
-  ]
+  phase3aModalVisible: false,
+  phase3aProbe: createPhase3AProbeState()
 };
 
 export function subscribe(listener) {

@@ -344,7 +344,283 @@ function renderResult(result) {
   `;
 }
 
-export function renderAnalysisModal(progress, onCancel) {
+function fmtDurationSec(value) {
+  return Number.isFinite(value) ? `${value.toFixed(3)} sec` : "-";
+}
+
+function fmtGapSec(value) {
+  return Number.isFinite(value) ? `${value.toFixed(3)} sec` : "-";
+}
+
+function fmtMediaTime(value) {
+  return Number.isFinite(value) ? `${value.toFixed(3)} sec` : "-";
+}
+
+function fmtStatus(value) {
+  return value || "-";
+}
+
+function renderPhase2BResult(result) {
+  const successfulFiles = result.successfulFiles || result.files || [];
+  const failedFiles = result.failedFiles || [];
+  const continuityLinks = result.continuity?.links || [];
+  const segments = result.segments || [];
+
+  const filesRows = successfulFiles
+    .map(
+      (file) => `<tr>
+      <td>${escapeHtml(file.fileName || "-")}</td>
+      <td>${escapeHtml(fmtDurationSec(file.durationSec))}</td>
+      <td>${escapeHtml(file.fileStartUtc || "-")}</td>
+      <td>${escapeHtml(file.fileEndUtc || "-")}</td>
+      <td>${escapeHtml(file.mappingSource || "-")}</td>
+      <td>${escapeHtml(file.mappingQuality || "-")}</td>
+      <td>${escapeHtml(file.gpsFormat || "-")}</td>
+    </tr>`
+    )
+    .join("");
+
+  const sortedRows = (result.sortedOrder || [])
+    .map(
+      (item) => `<tr>
+      <td>${escapeHtml(fmtAny(item.order))}</td>
+      <td>${escapeHtml(item.fileName || "-")}</td>
+      <td>${escapeHtml(item.fileStartUtc || "-")}</td>
+      <td>${escapeHtml(item.fileEndUtc || "-")}</td>
+    </tr>`
+    )
+    .join("");
+
+  const continuityRows = continuityLinks
+    .map(
+      (link) => `<tr>
+      <td>${escapeHtml(link.currentFile || "-")} → ${escapeHtml(link.nextFile || "-")}</td>
+      <td>${escapeHtml(link.currentEndUtc || "-")}</td>
+      <td>${escapeHtml(link.nextStartUtc || "-")}</td>
+      <td>${escapeHtml(fmtGapSec(link.gapSec))}</td>
+      <td>${escapeHtml(link.relation || "-")}</td>
+    </tr>`
+    )
+    .join("");
+
+  const segmentRows = segments
+    .map(
+      (segment) => `<tr>
+      <td>${escapeHtml(segment.segmentId || "-")}</td>
+      <td>${escapeHtml(segment.startTime || "-")}</td>
+      <td>${escapeHtml(segment.endTime || "-")}</td>
+      <td>${escapeHtml((segment.files || []).map((file) => file.fileName).join(", ") || "-")}</td>
+    </tr>`
+    )
+    .join("");
+
+  const failedRows = failedFiles
+    .map(
+      (file) => `<tr>
+      <td>${escapeHtml(file.fileName || "-")}</td>
+      <td>${escapeHtml(file.errorCode || "-")}</td>
+      <td>${escapeHtml(file.errorMessage || "-")}</td>
+    </tr>`
+    )
+    .join("");
+
+  const mappingSourceRows = (result.timeSourceAudit?.rows || [])
+    .map(
+      (row) => `<tr>
+      <td>${escapeHtml(row.fileName || "-")}</td>
+      <td>${escapeHtml(row.mappingSource || "-")}</td>
+      <td>${escapeHtml(row.mappingQuality || "-")}</td>
+      <td>${escapeHtml(row.mappingSourceReason || "-")}</td>
+    </tr>`
+    )
+    .join("");
+
+  return `
+    <section class="phase2a-result">
+      <h2>Phase 2B 検証結果</h2>
+
+      <section class="result-block">
+        <h3>Summary</h3>
+        <div class="kv-grid">
+          <div>Route</div><div>${escapeHtml(result.routeLabel || "-")}</div>
+          <div>status</div><div>${result.ok ? "success" : "failed"}</div>
+          <div>成功ファイル数</div><div>${escapeHtml(fmtAny(successfulFiles.length))}</div>
+          <div>失敗ファイル数</div><div>${escapeHtml(fmtAny(failedFiles.length))}</div>
+          <div>continuity tolerance</div><div>${escapeHtml(fmtGapSec(result.continuityToleranceSec))}</div>
+          <div>segment数</div><div>${escapeHtml(fmtAny(segments.length))}</div>
+        </div>
+      </section>
+
+      <section class="result-block">
+        <h3>Files</h3>
+        <div class="result-table-wrap">
+          <table class="result-table compact">
+            <thead>
+              <tr>
+                <th>fileName</th>
+                <th>duration</th>
+                <th>fileStartUtc</th>
+                <th>fileEndUtc</th>
+                <th>mappingSource</th>
+                <th>mappingQuality</th>
+                <th>GPS format</th>
+              </tr>
+            </thead>
+            <tbody>${filesRows || "<tr><td colspan='7'>-</td></tr>"}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="result-block">
+        <h3>Sorted order</h3>
+        <div class="result-table-wrap">
+          <table class="result-table compact">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>file</th>
+                <th>start</th>
+                <th>end</th>
+              </tr>
+            </thead>
+            <tbody>${sortedRows || "<tr><td colspan='4'>-</td></tr>"}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="result-block">
+        <h3>Continuity</h3>
+        <div class="result-table-wrap">
+          <table class="result-table compact">
+            <thead>
+              <tr>
+                <th>pair</th>
+                <th>current end</th>
+                <th>next start</th>
+                <th>gap</th>
+                <th>判定</th>
+              </tr>
+            </thead>
+            <tbody>${continuityRows || "<tr><td colspan='5'>-</td></tr>"}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="result-block">
+        <h3>Segments</h3>
+        <div class="result-table-wrap">
+          <table class="result-table compact">
+            <thead>
+              <tr>
+                <th>segmentId</th>
+                <th>start</th>
+                <th>end</th>
+                <th>files</th>
+              </tr>
+            </thead>
+            <tbody>${segmentRows || "<tr><td colspan='4'>-</td></tr>"}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="result-block">
+        <h3>Mapping source semantics</h3>
+        <p>${escapeHtml(result.timeSourceAudit?.note || "-")}</p>
+        <div class="result-table-wrap">
+          <table class="result-table compact">
+            <thead>
+              <tr>
+                <th>file</th>
+                <th>source</th>
+                <th>quality</th>
+                <th>reason</th>
+              </tr>
+            </thead>
+            <tbody>${mappingSourceRows || "<tr><td colspan='4'>-</td></tr>"}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="result-block">
+        <h3>失敗ファイル</h3>
+        <div class="result-table-wrap">
+          <table class="result-table compact">
+            <thead>
+              <tr>
+                <th>fileName</th>
+                <th>errorCode</th>
+                <th>errorMessage</th>
+              </tr>
+            </thead>
+            <tbody>${failedRows || "<tr><td colspan='3'>なし</td></tr>"}</tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  `;
+}
+
+function renderPhase3BResult(result) {
+  const multiMp4Status = Number(result.fileCount || 0) >= 2 ? (result.verification?.multiMp4 ? "Success" : "Failed") : "Skipped";
+  const verificationRows = [
+    ["複数MP4処理", multiMp4Status],
+    ["Segment境界処理", result.verification?.segmentBoundaries],
+    ["recording gap除外", result.verification?.recordingGapExcluded],
+    ["absolute UTC付与", result.verification?.absoluteUtcAssigned],
+    ["WebP 960px", result.verification?.webp960px],
+    ["WebP quality 0.8", result.verification?.webpQuality08]
+  ]
+    .map(
+      ([label, status]) => `<tr>
+        <td>${escapeHtml(label)}</td>
+        <td>${escapeHtml(status)}</td>
+      </tr>`
+    )
+    .join("");
+
+  return `
+    <section class="phase2a-result">
+      <h2>Phase 3B 検証結果</h2>
+
+      <section class="result-block">
+        <h3>Summary</h3>
+        <div class="kv-grid">
+          <div>Status</div><div>${escapeHtml(fmtStatus(result.status))}</div>
+          <div>Route</div><div>${escapeHtml(result.routeLabel || "-")}</div>
+          <div>抽出間隔</div><div>${escapeHtml(fmtMediaTime(result.frameIntervalSec))}</div>
+          <div>対象MP4数</div><div>${escapeHtml(fmtAny(result.fileCount))}</div>
+          <div>Segment数</div><div>${escapeHtml(fmtAny(result.segmentCount))}</div>
+          <div>生成予定枚数</div><div>${escapeHtml(fmtAny(result.plannedCount))}</div>
+          <div>実生成枚数</div><div>${escapeHtml(fmtAny(result.generatedCount))}</div>
+          <div>失敗枚数</div><div>${escapeHtml(fmtAny(result.failedCount))}</div>
+          <div>処理時間</div><div>${escapeHtml(Number.isFinite(result.elapsedMs) ? `${result.elapsedMs.toFixed(3)} ms` : "-")}</div>
+          <div>平均WebPサイズ</div><div>${escapeHtml(fmtBytes(result.averageWebpSizeBytes))}</div>
+          <div>WebP総容量</div><div>${escapeHtml(fmtBytes(result.estimatedTotalBytes))}</div>
+          <div>Phase 3B overall</div><div>${result.overallSuccess ? "Success" : "Failed"}</div>
+        </div>
+      </section>
+
+      <section class="result-block">
+        <h3>検証項目</h3>
+        <div class="result-table-wrap">
+          <table class="result-table compact">
+            <thead>
+              <tr>
+                <th>項目</th>
+                <th>結果</th>
+              </tr>
+            </thead>
+            <tbody>${verificationRows}</tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  `;
+}
+
+export function renderAnalysisModal(progress, handlers) {
+  const onCancel = typeof handlers === "function" ? handlers : handlers?.onCancel;
+  const onCommitRoute = typeof handlers === "function" ? null : handlers?.onCommitRoute;
   const items = progress.stageStateList
     .map((stage) => {
       const mark = getStateMark(stage.state);
@@ -357,10 +633,14 @@ export function renderAnalysisModal(progress, onCancel) {
 
   const progressPercent = Number.isFinite(progress.overallProgress) ? Math.max(0, Math.min(100, progress.overallProgress)) : null;
   const running = progress.status === "running";
+  const isPhase2B = progress.phase === "phase2b";
+  const isPhase3B = progress.phase === "phase3b";
   const logText = (progress.logs || []).join("\n");
   const liveExtract = progress.extraction || {};
   const readRatioText = Number.isFinite(liveExtract.ratio) ? `${(liveExtract.ratio * 100).toFixed(2)}%` : "-";
   const expectedSamplesText = liveExtract.expectedSamples == null ? "-" : String(liveExtract.expectedSamples);
+  const fileProgressText = Number.isFinite(progress.fileProgressPercent) ? `${progress.fileProgressPercent.toFixed(1)}%` : "-";
+  const stageLabel = progress.currentStageLabel || progress.stageStateList[progress.stageIndex]?.label || "-";
 
   const errorBlock =
     progress.status === "error" || progress.status === "canceled"
@@ -370,28 +650,53 @@ export function renderAnalysisModal(progress, onCancel) {
         </div>`
       : "";
 
-  const resultBlock = progress.status === "done" && progress.result ? renderResult(progress.result) : "";
+  const hasPhaseResult = Boolean(progress.result) && (progress.status === "done" || progress.status === "error" || progress.status === "canceled");
+  const resultBlock = hasPhaseResult ? (isPhase3B ? renderPhase3BResult(progress.result) : isPhase2B ? renderPhase2BResult(progress.result) : renderResult(progress.result)) : "";
   const phaseStatusText =
-    progress.status === "done" && progress.result
+    progress.status === "done" && progress.result && !isPhase2B && !isPhase3B
       ? progress.result.phase2a?.message || progress.status
       : progress.status || "idle";
+
+  const phase3BProgressBlock = isPhase3B && progress.status === "running"
+    ? `<section class="result-block">
+        <h3>WebP生成中の進捗</h3>
+        <div class="kv-grid">
+          <div>現在ファイル</div><div>${escapeHtml(progress.currentFileName || "-")}</div>
+          <div>現在Segment</div><div>${escapeHtml(progress.currentSegmentLabel || "-")}</div>
+          <div>生成済み / 予定枚数</div><div>${escapeHtml(fmtAny(progress.webpDone))} / ${escapeHtml(fmtAny(progress.webpTotal))}</div>
+          <div>現在absolute UTC</div><div>${escapeHtml(progress.currentAbsoluteUtc || "-")}</div>
+          <div>現在media time</div><div>${escapeHtml(fmtMediaTime(progress.currentMediaTimeSec))}</div>
+        </div>
+      </section>`
+    : "";
+
+  const actionButtons = running
+    ? `<button class="cancel-btn" id="cancelAnalysisBtn">キャンセル</button>`
+    : isPhase2B && progress.status === "done" && progress.canCommitRoute
+      ? `<button class="ghost-btn" id="closeAnalysisBtn">閉じる</button>
+         <button class="cancel-btn" id="commitRouteBtn">Routeを追加</button>`
+      : `<button class="cancel-btn" id="cancelAnalysisBtn">閉じる</button>`;
 
   const wrapper = document.createElement("section");
   wrapper.className = "analysis-modal-backdrop";
   wrapper.innerHTML = `
     <div class="analysis-modal" role="dialog" aria-modal="true" aria-label="Route解析モーダル">
-      <h2>Phase 2A: GPMF/GPS技術検証</h2>
+      <h2>${isPhase3B ? "Phase 3B: Segment WebP生成" : isPhase2B ? "Phase 2B: 複数MP4時系列整列とSegment化" : "Phase 2A: GPMF/GPS技術検証"}</h2>
       <div class="analysis-meta">
         <div>Route: ${progress.routeLabel || "-"}</div>
         <div>ファイル: ${progress.currentFileName || "-"}</div>
         <div>ファイル進行: ${progress.fileIndex} / ${progress.fileTotal}</div>
+        <div>現在ステージ: ${escapeHtml(stageLabel)}</div>
+        <div>ファイル単位進捗: ${escapeHtml(fileProgressText)}</div>
+        <div>成功済み: ${escapeHtml(fmtAny(progress.successFileCount))}</div>
+        <div>失敗: ${escapeHtml(fmtAny(progress.failedFileCount))}</div>
         <div>状態: ${escapeHtml(phaseStatusText)}</div>
       </div>
       <div class="progress-track ${progressPercent == null ? "indeterminate" : ""}" aria-label="全体進捗">
         <div class="progress-fill" style="width:${progressPercent == null ? 35 : progressPercent}%"></div>
       </div>
       <ul class="step-list">${items}</ul>
-      <section class="result-block">
+      ${isPhase3B ? phase3BProgressBlock : `<section class="result-block">
         <h3>gpmd抽出中の進捗</h3>
         <div class="kv-grid">
           <div>読み込み</div><div>${escapeHtml(fmtBytes(liveExtract.bytesRead))} / ${escapeHtml(fmtBytes(liveExtract.totalBytes))} (${escapeHtml(readRatioText)})</div>
@@ -402,7 +707,7 @@ export function renderAnalysisModal(progress, onCancel) {
           <div>nextFileStart</div><div>${escapeHtml(fmtAny(liveExtract.nextFileStart))}</div>
           <div>last sample DTS</div><div>${escapeHtml(fmtAny(liveExtract.lastSampleDts))}</div>
         </div>
-      </section>
+      </section>`}
       ${errorBlock}
       <section class="result-block">
         <h3>解析ログ</h3>
@@ -410,14 +715,31 @@ export function renderAnalysisModal(progress, onCancel) {
       </section>
       ${resultBlock}
       <div class="modal-footer">
-        <button class="cancel-btn" id="cancelAnalysisBtn">${running ? "キャンセル" : "閉じる"}</button>
+        ${actionButtons}
       </div>
     </div>
   `;
 
-  wrapper.querySelector("#cancelAnalysisBtn").addEventListener("click", () => {
-    onCancel();
-  });
+  const cancelBtn = wrapper.querySelector("#cancelAnalysisBtn");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      onCancel?.();
+    });
+  }
+
+  const closeBtn = wrapper.querySelector("#closeAnalysisBtn");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      onCancel?.();
+    });
+  }
+
+  const commitBtn = wrapper.querySelector("#commitRouteBtn");
+  if (commitBtn) {
+    commitBtn.addEventListener("click", () => {
+      onCommitRoute?.();
+    });
+  }
 
   return wrapper;
 }

@@ -1649,6 +1649,22 @@ function buildResult(context, validation, flags) {
   const validGpsSamples = decodedGps9Records.filter(
     (point) => point.gpsKind === "GPS9" && isGpsFixValid(point.fix) && isFiniteLatLng(point.latitude, point.longitude)
   );
+  const validGpsTimeline = validGpsSamples.map((point, index) => ({
+    sampleId: `gps9-${String(index + 1).padStart(6, "0")}`,
+    sampleIndex: point.sampleIndex,
+    telemetrySampleIndex: point.telemetrySampleIndex,
+    indexInTelemetrySample: point.indexInTelemetrySample,
+    gpsTimestampMs: point.timestampMs,
+    gpsTimestamp: point.timestampIso,
+    lat: point.latitude,
+    lng: point.longitude,
+    altitudeM: point.altitude,
+    gpsFix: point.fix,
+    gpsDop: point.dop,
+    timestampSource: point.timestampSource,
+    sourceSampleIndex: point.sampleIndex,
+    sourceTelemetrySampleIndex: point.telemetrySampleIndex
+  }));
   const firstDecodedGps9 = decodedGps9Records[0] || null;
   const firstValidGps9 = validGpsSamples[0] || null;
   const firstGps = firstValidGps9 || firstDecodedGps9 || gpsPoints[0] || null;
@@ -1715,6 +1731,7 @@ function buildResult(context, validation, flags) {
       firstValidSample: firstValidGps9,
       lastSample: fullFileScanned ? lastGps : null,
       lastSampleFromScanned: lastGps,
+      validGpsTimeline,
       top10: gpsPoints.slice(0, 10),
       timestampsConstructed: hasAbsoluteTimestamp,
       fullFileScanned

@@ -19,6 +19,23 @@ export const PHASE2B_ANALYSIS_STAGES = [
   "Route構造を確定"
 ];
 
+export const PHASE3A_STAGES = [
+  "MP4を確認",
+  "HTMLVideoElementを初期化",
+  "メタデータを取得",
+  "指定時刻へseek",
+  "Canvasへ描画",
+  "WebPを生成",
+  "結果を確認"
+];
+
+export const PHASE3B_ANALYSIS_STAGES = [
+  "WebP生成計画を作成",
+  "Segmentごとに抽出時刻を解決",
+  "MP4からWebPを生成",
+  "Route画像セットを確定"
+];
+
 export function createProject({ name, frameIntervalSec }) {
   const now = new Date().toISOString();
   return {
@@ -30,6 +47,7 @@ export function createProject({ name, frameIntervalSec }) {
     createdAt: now,
     updatedAt: now,
     routes: [],
+    nextRouteSequence: 1,
     mapSettings: {
       mapType: "monochrome"
     }
@@ -86,6 +104,12 @@ export function createFrameSkeleton({ frameId, timestamp, videoOffsetSec, lat, l
     lat,
     lng,
     nearestGpsSampleId: null,
+    altitudeM: null,
+    gpsTimestamp: null,
+    gpsFix: null,
+    gpsDop: null,
+    gpsTimeDeltaMs: null,
+    gpsStatus: "missing",
     imageRef: null,
     width: null,
     height: null,
@@ -113,6 +137,9 @@ export function createProgressState(routeLabel = "", options = {}) {
   return {
     routeLabel,
     currentFileName: "-",
+    currentSegmentLabel: "-",
+    currentAbsoluteUtc: null,
+    currentMediaTimeSec: null,
     fileIndex: 0,
     fileTotal: 0,
     currentStageLabel: stageLabels[0] || "-",
@@ -147,6 +174,26 @@ export function createProgressState(routeLabel = "", options = {}) {
       label,
       index,
       state: index === 0 ? "pending" : "pending"
+    }))
+  };
+}
+
+export function createPhase3AProbeState() {
+  return {
+    currentFileName: "-",
+    status: "idle",
+    overallProgress: null,
+    currentProbeIndex: 0,
+    probeCount: 0,
+    targetTimeSec: null,
+    logs: [],
+    result: null,
+    errorCode: null,
+    errorMessage: null,
+    stageStateList: PHASE3A_STAGES.map((label, index) => ({
+      label,
+      index,
+      state: "pending"
     }))
   };
 }

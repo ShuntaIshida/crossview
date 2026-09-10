@@ -1,0 +1,36 @@
+{
+  "ok": true,
+  "plannedCount": 1312,
+  "generatedCount": 1312,
+  "errorCount": 0,
+  "elapsedMs": 112624.2,
+  "averageWebpSizeBytes": 155389,
+  "estimatedTotalBytes": 203870346,
+  "segmentCount": 4,
+  "framesPerSegment": [
+    {
+      "segmentId": "segment-01",
+      "frameCount": 603,
+      "startTime": "2025-11-04T00:23:32.357Z",
+      "endTime": "2025-11-04T01:13:43.219Z"
+    },
+    {
+      "segmentId": "segment-02",
+      "frameCount": 105,
+      "startTime": "2025-11-04T01:37:11.569Z",
+      "endTime": "2025-11-04T01:45:53.722Z"
+    },
+    {
+      "segmentId": "segment-03",
+      "frameCount": 603,
+      "startTime": "2025-11-04T01:47:16.092Z",
+      "endTime": "2025-11-04T02:37:27.271Z"
+    },
+    {
+      "segmentId": "segment-04",
+      "frameCount": 1,
+      "startTime": "2025-11-04T03:25:17.000Z",
+      "endTime": "2025-11-04T03:25:21.104Z"
+    }
+  ]
+}

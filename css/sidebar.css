@@ -56,6 +56,15 @@
   margin-bottom: 14px;
 }
 
+.phase3a-probe-btn {
+  width: 100%;
+  background: #fff;
+  color: var(--accent-strong);
+  border: 1px solid var(--accent);
+  padding: 10px;
+  margin-bottom: 14px;
+}
+
 .sidebar-section-title {
   margin: 0 0 10px;
   font-size: 0.88rem;

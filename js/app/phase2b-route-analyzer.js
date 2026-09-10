@@ -215,6 +215,7 @@ function buildRouteFileMeta(file, phase2aResult) {
     clockDriftPpm: numberOrNull(mappingDecision.mapping?.clockDriftPpm),
     maxResidualMs: numberOrNull(mappingDecision.mapping?.maxResidualMs),
     rmsResidualMs: numberOrNull(mappingDecision.mapping?.rmsResidualMs),
+    gpsSamples: normalizeGpsTimelineSamples(phase2aResult.gps?.validGpsTimeline || [], file.name, file.size),
     phase2aState: phase2aResult.phase2a?.state || null,
     phase2aSuccess: Boolean(phase2aResult.phase2a?.success)
   };
@@ -344,7 +345,7 @@ function createSegment(tempRouteId, index, firstFile, polylineBreakBefore) {
     endTime: firstFile.fileEndUtc,
     polylineBreakBefore,
     files: [firstFile],
-    gpsSamples: [],
+    gpsSamples: cloneGpsSamples(firstFile.gpsSamples || []),
     frames: []
   };
 }
@@ -353,6 +354,39 @@ function appendFileToSegment(segment, routeFileMeta) {
   segment.files.push(routeFileMeta);
   segment.startTime = segment.files[0].fileStartUtc;
   segment.endTime = segment.files[segment.files.length - 1].fileEndUtc;
+  segment.gpsSamples = mergeSegmentGpsSamples(segment.gpsSamples, routeFileMeta.gpsSamples || []);
+}
+
+function normalizeGpsTimelineSamples(samples, fileName, sizeBytes) {
+  return (Array.isArray(samples) ? samples : [])
+    .filter((sample) => Number.isFinite(sample?.gpsTimestampMs) && Number.isFinite(sample?.lat) && Number.isFinite(sample?.lng))
+    .map((sample) => ({
+      sampleId: `${fileName}::${sample.sampleId || sample.sourceSampleIndex || sample.sampleIndex || "gps"}::${sizeBytes}`,
+      sampleIndex: sample.sampleIndex ?? null,
+      telemetrySampleIndex: sample.telemetrySampleIndex ?? null,
+      indexInTelemetrySample: sample.indexInTelemetrySample ?? null,
+      gpsTimestampMs: sample.gpsTimestampMs,
+      gpsTimestamp: sample.gpsTimestamp || toIsoOrNull(sample.gpsTimestampMs),
+      lat: sample.lat,
+      lng: sample.lng,
+      altitudeM: sample.altitudeM ?? null,
+      gpsFix: sample.gpsFix ?? null,
+      gpsDop: sample.gpsDop ?? null,
+      timestampSource: sample.timestampSource || null,
+      sourceFileName: fileName,
+      sourceFileSize: sizeBytes
+    }))
+    .sort((a, b) => a.gpsTimestampMs - b.gpsTimestampMs || String(a.sampleId).localeCompare(String(b.sampleId)));
+}
+
+function cloneGpsSamples(samples) {
+  return (Array.isArray(samples) ? samples : []).map((sample) => ({ ...sample }));
+}
+
+function mergeSegmentGpsSamples(existingSamples, additionalSamples) {
+  return [...(Array.isArray(existingSamples) ? existingSamples : []), ...(Array.isArray(additionalSamples) ? additionalSamples : [])]
+    .filter((sample) => Number.isFinite(sample?.gpsTimestampMs))
+    .sort((a, b) => a.gpsTimestampMs - b.gpsTimestampMs || String(a.sampleId).localeCompare(String(b.sampleId)));
 }
 
 function buildTimeSourceAuditSummary(successfulFiles) {
